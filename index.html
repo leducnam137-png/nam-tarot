@@ -65,6 +65,37 @@ const cards = [
 {name:"Thế Giới",meaning:"hoàn thành",reversedMeaning:"chưa trọn"}
 ];
 
+const painPoints = {
+    love: [
+        "thực ra bạn không sợ cô đơn, bạn chỉ sợ cảm giác bị thay thế.",
+        "bạn đang cố trở thành phiên bản họ muốn, thay vì là chính mình.",
+        "niềm tin đã vỡ một lần, nên giờ nhìn đâu bạn cũng thấy sự phản bội.",
+        "bạn đang dùng sự im lặng để tự hành hạ chính mình, thay vì giải quyết.",
+        "thứ bạn đang níu giữ là một thói quen khó bỏ, không phải tình yêu chân chính."
+    ],
+    work: [
+        "bạn gánh vác trách nhiệm không phải của mình vì sợ bị đánh giá thấp.",
+        "cái giá của sự ổn định hiện tại là sự bào mòn đam mê của chính bạn.",
+        "bạn biết mình xứng đáng nhiều hơn, nhưng nỗi sợ thất bại đang xích chân bạn lại.",
+        "đối thủ lớn nhất lúc này là sự trì hoãn núp bóng dưới cái tên 'cẩn thận'.",
+        "bạn đang cố chứng minh giá trị với những người vốn dĩ không bao giờ công nhận bạn."
+    ],
+    mind: [
+        "bạn đang tự tạo ra một nhà tù tâm trí và tự nhốt mình vào đó mỗi đêm.",
+        "nỗi sợ bị bỏ rơi khiến bạn quá nhạy cảm với từng cử chỉ nhỏ của người khác.",
+        "bạn đang lo lắng cho một kịch bản tồi tệ vốn dĩ chưa hề xảy ra trong thực tế.",
+        "bạn thấu hiểu nỗi đau của cả thế giới, nhưng lại quá khắc nghiệt với bản thân mình.",
+        "thứ bạn thực sự cần là sự tĩnh lặng để đối diện, không phải thêm những lời khuyên sáo rỗng."
+    ],
+    decision: [
+        "thật lòng đi, bạn đã có câu trả lời rồi, bạn chỉ đang tìm người ủng hộ nó thôi.",
+        "chọn phương án an toàn nhất vào lúc này đôi khi lại là quyết định mạo hiểm nhất.",
+        "bạn sợ chọn sai, nhưng thực tế việc không chọn gì mới là sai lầm lớn nhất.",
+        "đừng để những bóng ma thất bại trong quá khứ làm mờ đi lý trí của bạn ở hiện tại.",
+        "mọi sự do dự của bạn đều bắt nguồn từ việc bạn chưa thực sự tin vào bản sắc của chính mình."
+    ]
+};
+
 function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
 function validDOB(d,m,y){return d>=1&&d<=31 && m>=1&&m<=12 && y>=1900&&y<=2100;}
 function lifeNumber(d,m,y){let sum=(d+""+m+""+y).split("").reduce((a,b)=>a+parseInt(b),0);while(sum>9){sum=sum.toString().split("").reduce((a,b)=>a+parseInt(b),0)}return sum;}
@@ -78,9 +109,7 @@ function startDraw(){
     if(!name||!q){alert("Nam Hải xin nhắc: Bạn hãy nhập đủ Tên và Câu hỏi nhé!");return;}
     if(locked){showPaywall();return;}
     
-    // FIX NHẠC: Ép lệnh play ngay khi user tương tác nút bấm
-    let m = document.getElementById("bgm");
-    m.play().catch(e => console.log("Audio Playback Error:", e));
+    document.getElementById("bgm").play().catch(()=>{});
 
     step=0;
     picked=shuffle(cards.map((c,i)=>({...c,index:i}))).slice(0,5).map(c=>({card:c,rev:Math.random()<0.5}));
@@ -94,8 +123,6 @@ function showNext(){
     if(step<5){
         let roles=["Quá khứ","Hiện tại","Vấn đề","Hành vi","Kết quả"];
         let p=picked[step];
-        
-        // FIX ẢNH: Format index thành 2 chữ số (00, 01...) để khớp URL server Sacred-Texts
         let formattedIdx = p.card.index < 10 ? "0" + p.card.index : p.card.index;
         let imgUrl = `https://www.sacred-texts.com/tarot/pkt/img/ar${formattedIdx}.jpg`;
         
@@ -124,32 +151,37 @@ function typeText(text){
 
 function finish(){
     let name=document.getElementById("name").value;
+    let topic=document.getElementById("topic").value;
+    let state=document.getElementById("state").value;
     let d=parseInt(document.getElementById("day").value);
     let m=parseInt(document.getElementById("month").value);
     let y=parseInt(document.getElementById("year").value);
     let num=validDOB(d,m,y)?lifeNumber(d,m,y):null;
     let mgs=picked.map(p=>p.rev?p.card.reversedMeaning:p.card.meaning);
 
-    let s=`👉 Chào ${name}, những lá bài này hiện diện để dẫn lối cho bạn.\n\n`;
-    s+=`Mọi chuyện bắt đầu từ quá khứ khi bạn cảm thấy ${mgs[0]}. `;
-    s+=`Hiện tại, bạn đang ở trong trạng thái ${mgs[1]}.\n\n`;
-    s+=`Tuy nhiên, nút thắt thực sự mà bạn cần lưu tâm chính là sự ${mgs[2]}. `;
-    s+=`Có thể bạn đang cố gắng xử lý bằng cách ${mgs[3]}, nhưng kết quả cuối cùng hướng tới sự ${mgs[4]}.\n\n`;
-    
-    if(num==7) s+="✨ Số chủ đạo 7: Hãy tin vào trực giác của mình.\n\n";
-    if(num==8) s+="✨ Số chủ đạo 8: Hãy quyết đoán hơn.\n\n";
+    let pool = painPoints[topic] || painPoints.mind;
+    let randomPain = pool[Math.floor(Math.random() * pool.length)];
+    let personalizedPain = state === "hesitate" ? `${name} ơi, sự do dự này thực chất là vì bạn đang sợ mất đi vùng an toàn cũ. ${randomPain}` : `${name} này, ${randomPain}`;
 
-    s+="💡 Câu trả lời vốn đã ở trong tim bạn, bài chỉ là tấm gương soi chiếu.\n\n";
+    let s=`👉 Chào ${name}, những lá bài này hiện diện để soi chiếu sự thật bạn đang đối mặt.\n\n`;
+    s+=`Mọi chuyện bắt đầu khi bạn cảm thấy ${mgs[0]}. Hiện tại, bạn đang ở trong trạng thái ${mgs[1]}.\n\n`;
+    s+=`⚠️ **Nam Hải tiên sinh thấy rằng:** ${personalizedPain}\n\n`;
+    s+=`Nút thắt thực sự là sự ${mgs[2]}. Có thể bạn đang xử lý bằng cách ${mgs[3]}, nhưng kết quả cuối cùng hướng tới sự ${mgs[4]}.\n\n`;
+    
+    if(num==7) s+="✨ Số chủ đạo 7: Hãy tin vào trực giác bên trong mình.\n\n";
+    if(num==8) s+="✨ Số chủ đạo 8: Hãy quyết đoán và thực tế hơn.\n\n";
+
+    s+="💡 Câu trả lời vốn đã ở trong tim bạn, bài chỉ là tấm gương soi chiếu. Bạn đã sẵn sàng đối diện chưa?\n\n";
     s+="— Lời bình từ Nam Hải tiên sinh";
 
-    let short=s.slice(0,Math.floor(s.length*0.75));
+    let short=s.slice(0,Math.floor(s.length*0.72));
     typeText(short);
 
     document.getElementById("paywall").classList.remove("hidden");
     document.getElementById("paywall").innerHTML=`
     <div class="result-card lock">
-        <p>🔒 Nhập mã NAMHAI để xem trọn vẹn lời giải mã.</p>
-        <input id="code" placeholder="Mã..." style="width:100px">
+        <p>🔒 Bạn vừa nhận được 72% lời giải. 28% còn lại là bí mật về sự chuyển hóa dành riêng cho ${name}. Nhập mã NAMHAI để mở khóa chìa khóa cuối cùng.</p>
+        <input id="code" placeholder="Mã..." style="width:140px">
         <button onclick="unlock('${encodeURIComponent(s)}')">Mở khóa</button>
     </div>`;
 
@@ -165,14 +197,10 @@ function unlock(full){
     }else{ alert("Mã chưa chính xác!"); }
 }
 
-// FIX COPY: Lấy trực tiếp innerText sạch sẽ
 function copyText(){ 
-    const textToCopy = document.getElementById("final").innerText;
-    navigator.clipboard.writeText(textToCopy); 
+    navigator.clipboard.writeText(document.getElementById("final").innerText); 
     alert("Đã sao chép lời tiên tri!"); 
 }
-
 function resetApp(){ localStorage.clear(); location.reload(); }
 function toggleMusic(){ let m=document.getElementById("bgm"); m.paused ? m.play() : m.pause(); }
 </script></body></html>
-
