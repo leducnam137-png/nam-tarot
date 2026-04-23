@@ -34,14 +34,12 @@ button{background:#ffcc00;color:#000;font-weight:bold;cursor:pointer}
 <div id="final"></div>
 <button id="copyBtn" class="hidden" onclick="copyText()">📋 Sao chép</button>
 <div id="paywall" class="hidden"></div>
-<div id="history"></div>
 
-<audio id="bgm" loop preload="auto">
-<source src="https://cdn.pixabay.com/download/audio/2022/02/11/audio_0344d56730.mp3?filename=meditation-bowl-6263.mp3" type="audio/mpeg">
+<audio id="bgm" loop preload="auto" crossorigin="anonymous">
+<source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-// GIỮ NGUYÊN 22 LÁ BÀI CỦA ANH
 const cards = [
 {name:"Kẻ Khờ",meaning:"bắt đầu mới",reversedMeaning:"mất phương hướng"},
 {name:"Pháp Sư",meaning:"kiểm soát",reversedMeaning:"thiếu kiểm soát"},
@@ -80,9 +78,9 @@ function startDraw(){
     if(!name||!q){alert("Nam Hải xin nhắc: Bạn hãy nhập đủ Tên và Câu hỏi nhé!");return;}
     if(locked){showPaywall();return;}
     
-    // ÉP PHÁT NHẠC NGAY KHI TƯƠNG TÁC (QUAN TRỌNG)
+    // FIX NHẠC: Ép lệnh play ngay khi user tương tác nút bấm
     let m = document.getElementById("bgm");
-    m.play().catch(e => console.log("Trình duyệt cần tương tác để phát nhạc"));
+    m.play().catch(e => console.log("Audio Playback Error:", e));
 
     step=0;
     picked=shuffle(cards.map((c,i)=>({...c,index:i}))).slice(0,5).map(c=>({card:c,rev:Math.random()<0.5}));
@@ -97,9 +95,9 @@ function showNext(){
         let roles=["Quá khứ","Hiện tại","Vấn đề","Hành vi","Kết quả"];
         let p=picked[step];
         
-        // SERVER CLOUDINARY - CHUẨN XÁC 100%
-        let imgIdx = p.card.index < 10 ? "0" + p.card.index : p.card.index;
-        let imgUrl = `https://res.cloudinary.com/hyunjin/image/upload/v1581850314/tarot/RWS_Tarot_${imgIdx}_${p.card.name.replace(/ /g, '_')}.jpg`;
+        // FIX ẢNH: Format index thành 2 chữ số (00, 01...) để khớp URL server Sacred-Texts
+        let formattedIdx = p.card.index < 10 ? "0" + p.card.index : p.card.index;
+        let imgUrl = `https://www.sacred-texts.com/tarot/pkt/img/ar${formattedIdx}.jpg`;
         
         document.getElementById("results").innerHTML+=`
         <div class="result-card">
@@ -113,7 +111,6 @@ function showNext(){
     }
 }
 
-// HÀM TYPING CHỐNG DÍNH CHỮ GIỮ NGUYÊN
 function typeText(text){
     let i=0; let el=document.getElementById("final"); el.innerHTML="";
     let interval=setInterval(()=>{
@@ -127,39 +124,33 @@ function typeText(text){
 
 function finish(){
     let name=document.getElementById("name").value;
-    let topic=document.getElementById("topic").value;
     let d=parseInt(document.getElementById("day").value);
     let m=parseInt(document.getElementById("month").value);
     let y=parseInt(document.getElementById("year").value);
     let num=validDOB(d,m,y)?lifeNumber(d,m,y):null;
     let mgs=picked.map(p=>p.rev?p.card.reversedMeaning:p.card.meaning);
 
-    let intro = (topic==="love") ? "Về cung bậc cảm xúc, " : (topic==="work") ? "Trong thực tế khách quan, " : (topic==="mind") ? "Nhìn sâu vào thế giới nội tâm, " : "Ở thời điểm đưa ra lựa chọn này, ";
-
-    let s=`👉 Chào ${name}, không phải ngẫu nhiên mà những lá bài này hiện diện trước mặt bạn.\n\n`;
-    s+=`${intro}mọi chuyện bắt đầu từ quá khứ khi bạn cảm thấy ${mgs[0]}. `;
-    s+=`Chính điều này đã dẫn dắt đến hiện tại, nơi bạn đang ở trong trạng thái ${mgs[1]}.\n\n`;
+    let s=`👉 Chào ${name}, những lá bài này hiện diện để dẫn lối cho bạn.\n\n`;
+    s+=`Mọi chuyện bắt đầu từ quá khứ khi bạn cảm thấy ${mgs[0]}. `;
+    s+=`Hiện tại, bạn đang ở trong trạng thái ${mgs[1]}.\n\n`;
     s+=`Tuy nhiên, nút thắt thực sự mà bạn cần lưu tâm chính là sự ${mgs[2]}. `;
-    s+=`Có thể bạn đang cố gắng xử lý bằng cách ${mgs[3]}, nhưng thành thật mà nói, điều này vẫn chưa thể giải quyết triệt để vấn đề gốc rễ.\n\n`;
-    s+=`Nếu bạn dám thay đổi và đối diện, kết quả cuối cùng sẽ hướng tới sự ${mgs[4]}.\n\n`;
+    s+=`Có thể bạn đang cố gắng xử lý bằng cách ${mgs[3]}, nhưng kết quả cuối cùng hướng tới sự ${mgs[4]}.\n\n`;
+    
+    if(num==7) s+="✨ Số chủ đạo 7: Hãy tin vào trực giác của mình.\n\n";
+    if(num==8) s+="✨ Số chủ đạo 8: Hãy quyết đoán hơn.\n\n";
 
-    if(picked[4].rev) s+="⚠️ Lưu ý: Kết quả này có thể xoay chiều tiêu cực nếu bạn vẫn tiếp tục trì hoãn.\n\n";
-    if(num==7) s+="✨ Với số chủ đạo 7, hãy tin vào trực giác bên trong mình.\n\n";
-    if(num==8) s+="✨ Với số chủ đạo 8, hãy quyết đoán và thực tế hơn.\n\n";
-
-    s+="💡 Điều bạn đang né tránh thực chất là: Bạn đã biết câu trả lời rồi, chỉ là bạn chưa đủ can đảm để chấp nhận nó mà thôi.\n\n";
+    s+="💡 Câu trả lời vốn đã ở trong tim bạn, bài chỉ là tấm gương soi chiếu.\n\n";
     s+="— Lời bình từ Nam Hải tiên sinh";
 
-    let short=s.slice(0,Math.floor(s.length*0.72));
+    let short=s.slice(0,Math.floor(s.length*0.75));
     typeText(short);
 
     document.getElementById("paywall").classList.remove("hidden");
     document.getElementById("paywall").innerHTML=`
     <div class="result-card lock">
-        <p>🔒 Nhập mã NAMHAI để xem trọn vẹn lời giải mã từ Nam Hải tiên sinh.</p>
-        <input id="code" placeholder="Mã mở khóa..." style="width:140px">
+        <p>🔒 Nhập mã NAMHAI để xem trọn vẹn lời giải mã.</p>
+        <input id="code" placeholder="Mã..." style="width:100px">
         <button onclick="unlock('${encodeURIComponent(s)}')">Mở khóa</button>
-        <p id="err" style="color:red"></p>
     </div>`;
 
     localStorage.setItem("seen","1");
@@ -167,18 +158,21 @@ function finish(){
 }
 
 function unlock(full){
-    let code=document.getElementById("code").value;
-    if(code==="NAMHAI"){
+    if(document.getElementById("code").value==="NAMHAI"){
         typeText(decodeURIComponent(full));
         document.getElementById("paywall").classList.add("hidden");
         document.getElementById("copyBtn").classList.remove("hidden");
-    }else{
-        document.getElementById("err").innerText="Mã chưa chính xác!";
-    }
+    }else{ alert("Mã chưa chính xác!"); }
 }
 
-function copyText(){ navigator.clipboard.writeText(document.getElementById("final").innerText.replace(/&nbsp;/g,' ')); alert("Đã sao chép!"); }
+// FIX COPY: Lấy trực tiếp innerText sạch sẽ
+function copyText(){ 
+    const textToCopy = document.getElementById("final").innerText;
+    navigator.clipboard.writeText(textToCopy); 
+    alert("Đã sao chép lời tiên tri!"); 
+}
+
 function resetApp(){ localStorage.clear(); location.reload(); }
-function toggleMusic(){ let m=document.getElementById("bgm"); if(m.paused){m.play()}else{m.pause()} }
+function toggleMusic(){ let m=document.getElementById("bgm"); m.paused ? m.play() : m.pause(); }
 </script></body></html>
 
