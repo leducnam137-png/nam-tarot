@@ -1,251 +1,189 @@
-<!DOCTYPE html><html lang="vi">
+<!DOCTYPE html>
+<html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Nam Hải Oracle – Masterpiece</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body{font-family:sans-serif;background:#0d0d0d;color:#fff;text-align:center;padding:15px}
-input,select,button{padding:10px;margin:5px;border-radius:6px;border:none;font-size:16px}
-button{background:#ffcc00;color:#000;font-weight:bold;cursor:pointer}
-.result-card{margin:10px;padding:12px;border:1px solid #444;border-radius:12px}
-.card-img{width:90px;max-width:100%;transition:0.3s}
-.rev{transform:rotate(180deg)}
-.hidden{display:none}
-.lock{background:#111;border:1px solid #ffcc00}
-#final{white-space:pre-line;margin-top:15px;text-align:left}
-@media (max-width:600px){
-.card-img{width:70px}
-button{width:90%}
-}
-</style>
-</head><body><h2>🔮 Nam Hải Oracle</h2><input id="name" placeholder="Họ và tên">
-<input id="question" placeholder="Bạn đang nghĩ gì..."><br><input id="day" type="number" placeholder="Ngày sinh">
-<input id="month" type="number" placeholder="Tháng sinh">
-<input id="year" type="number" placeholder="Năm sinh"><br><select id="topic">
-<option value="love">Tình cảm</option>
-<option value="work">Công việc</option>
-<option value="decision">Quyết định</option>
-<option value="mind">Nội tâm</option>
-</select><select id="state">
-<option value="pre">Chuẩn bị quyết định</option>
-<option value="hesitate">Đang do dự</option>
-<option value="after">Đã quyết định</option>
-</select><br>
-<button onclick="startDraw()">Trải bài</button>
-<button onclick="toggleMusic()">🎵</button>
-<button onclick="resetApp()">🔄 Reset</button><div id="results"></div>
-<div id="final"></div>
-<button id="copyBtn" class="hidden" onclick="copyText()">📋 Sao chép</button>
-<div id="paywall" class="hidden"></div>
-<div id="history"></div><audio id="bgm" loop>
-<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5b0b6f2c2d.mp3">
-</audio><script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nam Hải Oracle – Masterpiece</title>
+    <style>
+        body{font-family:sans-serif;background:#0d0d0d;color:#fff;text-align:center;padding:15px} 
+        input,select,button{padding:10px;margin:5px;border-radius:6px;border:none;font-size:16px; width: 85%; max-width: 300px;} 
+        button{background:#ffcc00;color:#000;font-weight:bold;cursor:pointer; width: auto !important; padding: 10px 25px;} 
+        .result-card{margin:15px auto;padding:15px;border:1px solid #444;border-radius:12px; max-width: 400px; background: #1a1a1a; box-shadow: 0 4px 15px rgba(0,0,0,0.5);} 
+        .card-img{width:90px;max-width:100%;transition:0.3s; margin: 10px 0;} 
+        .rev{transform:rotate(180deg)} 
+        .hidden{display:none} 
+        .lock{background:#111;border:2px solid #ffcc00} 
+        #final{white-space:pre-line;margin-top:20px;text-align:left; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.8; font-size: 17px; color: #e0e0e0;} 
+        @media (max-width:600px){ .card-img{width:80px} button{width:90% !important} }
+    </style>
+</head>
+<body>
 
-// ===== DATA =====
-const cards = [
-{name:"Kẻ Khờ",meaning:"bắt đầu mới",reversedMeaning:"mất phương hướng"},
-{name:"Pháp Sư",meaning:"kiểm soát",reversedMeaning:"thiếu kiểm soát"},
-{name:"Nữ Tư Tế",meaning:"trực giác",reversedMeaning:"mơ hồ"},
-{name:"Hoàng Hậu",meaning:"cảm xúc",reversedMeaning:"phụ thuộc"},
-{name:"Hoàng Đế",meaning:"cấu trúc",reversedMeaning:"cứng nhắc"},
-{name:"Giáo Hoàng",meaning:"niềm tin",reversedMeaning:"lệch chuẩn"},
-{name:"Người Tình",meaning:"kết nối",reversedMeaning:"mâu thuẫn"},
-{name:"Cỗ Xe",meaning:"tiến lên",reversedMeaning:"lệch hướng"},
-{name:"Sức Mạnh",meaning:"nội lực",reversedMeaning:"mất kiểm soát"},
-{name:"Ẩn Sĩ",meaning:"chiêm nghiệm",reversedMeaning:"cô lập"},
-{name:"Bánh Xe",meaning:"biến động",reversedMeaning:"lệch nhịp"},
-{name:"Công Lý",meaning:"cân bằng",reversedMeaning:"thiên lệch"},
-{name:"Treo Ngược",meaning:"góc nhìn mới",reversedMeaning:"bế tắc"},
-{name:"Cái Chết",meaning:"chuyển hóa",reversedMeaning:"chưa buông"},
-{name:"Tiết Độ",meaning:"hài hòa",reversedMeaning:"lệch"},
-{name:"Ác Quỷ",meaning:"ràng buộc",reversedMeaning:"giải thoát"},
-{name:"Tòa Tháp",meaning:"biến cố",reversedMeaning:"trì hoãn"},
-{name:"Ngôi Sao",meaning:"hy vọng",reversedMeaning:"mất niềm tin"},
-{name:"Mặt Trăng",meaning:"mơ hồ",reversedMeaning:"lộ ra"},
-{name:"Mặt Trời",meaning:"rõ ràng",reversedMeaning:"ảo tưởng"},
-{name:"Phán Xét",meaning:"thức tỉnh",reversedMeaning:"trì hoãn"},
-{name:"Thế Giới",meaning:"hoàn thành",reversedMeaning:"chưa trọn"}
-];
+    <h2>🔮 Nam Hải Oracle</h2>
+    
+    <div id="input-section">
+        <input id="name" placeholder="Họ và tên khách hàng"><br>
+        <input id="question" placeholder="Vấn đề bạn đang băn khoăn..."><br>
+        <input id="day" type="number" placeholder="Ngày sinh">
+        <input id="month" type="number" placeholder="Tháng sinh">
+        <input id="year" type="number" placeholder="Năm sinh"><br>
+        
+        <select id="topic">
+            <option value="love">Chuyện tình cảm</option>
+            <option value="work">Sự nghiệp & Tài chính</option>
+            <option value="decision">Quyết định quan trọng</option>
+            <option value="mind">Nội tâm & Tinh thần</option>
+        </select><br>
+        
+        <button onclick="startDraw()">Bắt đầu trải bài 🎵</button>
+        <button onclick="toggleMusic()">🔊/🔇</button>
+        <button onclick="resetApp()">🔄 Reset</button>
+    </div>
 
-// ===== UTIL =====
-function shuffle(a){
-for(let i=a.length-1;i>0;i--){
-let j=Math.floor(Math.random()*(i+1));
-[a[i],a[j]]=[a[j],a[i]];
-}
-return a;
-}
+    <div id="results"></div>
+    <div id="final"></div>
+    
+    <button id="copyBtn" class="hidden" onclick="copyText()">📋 Sao chép lời tiên tri</button>
+    <div id="paywall" class="hidden"></div>
 
-function validDOB(d,m,y){
-return d>=1&&d<=31 && m>=1&&m<=12 && y>=1900&&y<=2100;
-}
+    <audio id="bgm" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5b0b6f2c2d.mp3" type="audio/mpeg">
+    </audio>
 
-function lifeNumber(d,m,y){
-let sum=(d+""+m+""+y).split("").reduce((a,b)=>a+parseInt(b),0);
-while(sum>9){
-sum=sum.toString().split("").reduce((a,b)=>a+parseInt(b),0);
-}
-return sum;
-}
+    <script>
+        const cards = [
+            {name:"Kẻ Khờ",meaning:"sự bắt đầu mới mẻ",reversedMeaning:"sự mất phương hướng"},
+            {name:"Pháp Sư",meaning:"khả năng kiểm soát",reversedMeaning:"sự thiếu tập trung"},
+            {name:"Nữ Tư Tế",meaning:"trực giác nhạy bén",reversedMeaning:"sự mơ hồ khó đoán"},
+            {name:"Hoàng Hậu",meaning:"sự trù phú cảm xúc",reversedMeaning:"sự phụ thuộc quá mức"},
+            {name:"Hoàng Đế",meaning:"tính kỷ luật cao",reversedMeaning:"sự cứng nhắc bảo thủ"},
+            {name:"Giáo Hoàng",meaning:"niềm tin vững chắc",reversedMeaning:"sự lệch lạc chuẩn mực"},
+            {name:"Người Tình",meaning:"sự kết nối sâu sắc",reversedMeaning:"những mâu thuẫn nội tâm"},
+            {name:"Cỗ Xe",meaning:"đà tiến lên mạnh mẽ",reversedMeaning:"sự chệch hướng mục tiêu"},
+            {name:"Sức Mạnh",meaning:"nội lực kiên cường",reversedMeaning:"sự mất kiểm soát bản thân"},
+            {name:"Ẩn Sĩ",meaning:"sự chiêm nghiệm sâu",reversedMeaning:"sự cô lập đơn độc"},
+            {name:"Bánh Xe",meaning:"biến động thời cuộc",reversedMeaning:"những lệch nhịp bất ngờ"},
+            {name:"Công Lý",meaning:"sự cân bằng khách quan",reversedMeaning:"sự thiên lệch chủ quan"},
+            {name:"Treo Ngược",meaning:"góc nhìn mới lạ",reversedMeaning:"sự bế tắc tạm thời"},
+            {name:"Cái Chết",meaning:"sự chuyển hóa lớn",reversedMeaning:"tâm lý chưa thể buông bỏ"},
+            {name:"Tiết Độ",meaning:"sự hài hòa tiết chế",reversedMeaning:"sự mất cân bằng cuộc sống"},
+            {name:"Ác Quỷ",meaning:"sự ràng buộc vô hình",reversedMeaning:"khát vọng giải thoát"},
+            {name:"Tòa Tháp",meaning:"biến cố bất ngờ",reversedMeaning:"sự trì hoãn không đáng có"},
+            {name:"Ngôi Sao",meaning:"hy vọng rực sáng",reversedMeaning:"sự mất niềm tin tạm thời"},
+            {name:"Mặt Trăng",meaning:"sự mơ hồ ảo ảnh",reversedMeaning:"mọi thứ dần lộ ra ánh sáng"},
+            {name:"Mặt Trời",meaning:"sự rõ ràng rực rỡ",reversedMeaning:"những ảo tưởng xa rời thực tế"},
+            {name:"Phán Xét",meaning:"sự thức tỉnh tâm linh",reversedMeaning:"sự trì trệ thiếu quyết đoán"},
+            {name:"Thế Giới",meaning:"sự hoàn thành trọn vẹn",reversedMeaning:"những điều chưa thực sự trọn vẹn"}
+        ];
 
-// ===== STATE =====
-let picked=[],step=0;
-let locked=localStorage.getItem("seen")==="1";
+        let picked=[], step=0;
+        let locked = localStorage.getItem("seen") === "1";
 
-// ===== START =====
-function startDraw(){
+        function shuffle(a){
+            for(let i=a.length-1;i>0;i--){
+                let j=Math.floor(Math.random()*(i+1));
+                [a[i],a[j]]=[a[j],a[i]];
+            }
+            return a;
+        }
 
-let name=document.getElementById("name").value.trim();
-let q=document.getElementById("question").value.trim();
+        function validDOB(d,m,y){ return d>=1&&d<=31 && m>=1&&m<=12 && y>=1900&&y<=2100; }
+        function lifeNumber(d,m,y){
+            let sum=(d+""+m+""+y).split("").reduce((a,b)=>a+parseInt(b),0);
+            while(sum>9){ sum=sum.toString().split("").reduce((a,b)=>a+parseInt(b),0); }
+            return sum;
+        }
 
-if(!name||!q){alert("Nhập đủ thông tin");return;}
-if(locked){showPaywall();return;}
+        function startDraw(){
+            let name=document.getElementById("name").value.trim();
+            let q=document.getElementById("question").value.trim();
+            if(!name||!q){alert("Nam Hải xin nhắc: Bạn hãy nhập đủ Tên và Câu hỏi nhé!");return;}
+            if(locked){ showPaywall(); return; }
+            step=0;
+            picked=shuffle(cards.map((c,i)=>({...c,index:i}))).slice(0,5).map(c=>({card:c, rev:Math.random()<0.5}));
+            document.getElementById("results").innerHTML="";
+            document.getElementById("final").innerHTML="";
+            document.getElementById("copyBtn").classList.add("hidden");
+            showNext();
+        }
 
-step=0;
-picked=shuffle(cards.map((c,i)=>({...c,index:i}))).slice(0,5).map(c=>({
-card:c,rev:Math.random()<0.5
-}));
+        function showNext(){
+            if(step<5){
+                let roles=["Quá khứ","Hiện tại","Nút thắt","Hành động","Kết quả"];
+                let p=picked[step];
+                document.getElementById("results").innerHTML+=`
+                <div class="result-card">
+                    <b>Lá bài ${step+1}: ${roles[step]}</b><br>
+                    <img class="card-img ${p.rev?'rev':''}" src="https://www.sacred-texts.com/tarot/pkt/img/ar${p.card.index}.jpg"><br>
+                    ${p.card.name}<br>
+                    ${step<4?`<button onclick="showNext()">Lật lá tiếp theo</button>`:`<button onclick="finish()">Xem lời giải mã</button>`}
+                </div>`;
+                step++;
+                window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+            }
+        }
 
-document.getElementById("results").innerHTML="";
-document.getElementById("final").innerHTML="";
-document.getElementById("copyBtn").classList.add("hidden");
+        function typeText(text){
+            let i=0; let el=document.getElementById("final"); el.innerText="";
+            let interval=setInterval(()=>{
+                el.innerText+=text[i]; i++;
+                if(i>=text.length) clearInterval(interval);
+            },25);
+        }
 
-showNext();
-}
+        function finish(){
+            let name=document.getElementById("name").value;
+            let topic=document.getElementById("topic").value;
+            let d=parseInt(document.getElementById("day").value);
+            let m=parseInt(document.getElementById("month").value);
+            let y=parseInt(document.getElementById("year").value);
+            let num=validDOB(d,m,y)?lifeNumber(d,m,y):null;
+            let mgs=picked.map(p=>p.rev?p.card.reversedMeaning:p.card.meaning);
 
-// ===== SHOW =====
-function showNext(){
-if(step<5){
-let roles=["Quá khứ","Hiện tại","Vấn đề","Hành vi","Kết quả"];
-let p=picked[step];
+            let intro = (topic==="love") ? "Về cung bậc cảm xúc, " : (topic==="work") ? "Xét về thực tế khách quan, " : (topic==="mind") ? "Nhìn sâu vào nội tâm, " : "Tại thời điểm này, ";
+            
+            let s=`👉 Chào ${name}, không phải ngẫu nhiên mà những lá bài này hiện diện trước mặt bạn.\n\n${intro}mọi chuyện bắt đầu từ quá khứ khi bạn cảm thấy ${mgs[0]}. Điều này dẫn đến hiện tại, khi bạn đang ở trong trạng thái ${mgs[1]}.\n\nTuy nhiên, nút thắt thực sự mà bạn cần lưu tâm chính là ${mgs[2]}. Bạn đang cố gắng xử lý bằng cách ${mgs[3]}, nhưng thành thật mà nói, điều này vẫn chưa thể giải quyết triệt để vấn đề.\n\nNếu bạn dám thay đổi và đối diện, kết quả cuối cùng sẽ hướng tới ${mgs[4]}.`;
+            
+            if(picked[4].rev) s+="\n\n⚠️ Lưu ý: Kết quả có dấu hiệu xoay chiều nếu bạn vẫn giữ nguyên định kiến cũ.";
+            if(num==7) s+="\n\n✨ Số chủ đạo 7: Trực giác của bạn rất mạnh, hãy tin vào cảm giác của mình.";
+            if(num==8) s+="\n\n✨ Số chủ đạo 8: Hãy tập trung vào tính thực tế và sự công bằng trong mọi lựa chọn.";
+            
+            s+="\n\n💡 Điều bạn đang né tránh thực chất là: Bạn đã có câu trả lời rồi, chỉ là bạn chưa đủ can đảm để chấp nhận nó mà thôi.\n\n— Lời bình từ Nam Hải tiên sinh";
 
-document.getElementById("results").innerHTML+=`
-<div class="result-card">
-<b>${roles[step]}</b><br>
-<img class="card-img ${p.rev?'rev':''}" src="https://www.sacred-texts.com/tarot/pkt/img/ar${p.card.index}.jpg"><br>
-${p.card.name}
-<br>
-${step<4?`<button onclick="showNext()">Tiếp</button>`:`<button onclick="finish()">Xem kết quả</button>`}
-</div>`;
+            let short=s.slice(0,Math.floor(s.length*0.75));
+            typeText(short);
 
-step++;
-window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
-}
-}
+            document.getElementById("paywall").classList.remove("hidden");
+            document.getElementById("paywall").innerHTML=`
+            <div class="result-card lock">
+                <p>🔒 Nam Hải tiên sinh đã soạn xong lời giải mã.</p>
+                <p><small>Nhập mã để mở khóa phần kết quả và lời khuyên quan trọng nhất.</small></p>
+                <input id="code" placeholder="Mã mở khóa..." style="width:150px">
+                <button onclick="unlock('${encodeURIComponent(s)}')">Mở khóa</button>
+            </div>`;
+            localStorage.setItem("seen","1");
+            locked=true;
+        }
 
-// ===== TYPING EFFECT =====
-function typeText(text){
-let i=0;
-let el=document.getElementById("final");
-el.innerText="";
-let interval=setInterval(()=>{
-el.innerText+=text[i];
-i++;
-if(i>=text.length) clearInterval(interval);
-},20);
-}
+        function unlock(full){
+            if(document.getElementById("code").value==="NAMHAI"){
+                typeText(decodeURIComponent(full));
+                document.getElementById("paywall").classList.add("hidden");
+                document.getElementById("copyBtn").classList.remove("hidden");
+            }else{ alert("Mã không đúng rồi!"); }
+        }
 
-// ===== ENGINE =====
-function finish(){
+        function copyText(){
+            navigator.clipboard.writeText(document.getElementById("final").innerText);
+            alert("Đã sao chép lời tiên tri!");
+        }
 
-let name=document.getElementById("name").value;
-let q=document.getElementById("question").value;
-let topic=document.getElementById("topic").value;
+        function resetApp(){ localStorage.clear(); location.reload(); }
 
-let d=parseInt(document.getElementById("day").value);
-let m=parseInt(document.getElementById("month").value);
-let y=parseInt(document.getElementById("year").value);
-
-let num=validDOB(d,m,y)?lifeNumber(d,m,y):null;
-
-let mgs=picked.map(p=>p.rev?p.card.reversedMeaning:p.card.meaning);
-
-// topic tone
-let intro="";
-if(topic==="love") intro="Về cảm xúc, ";
-if(topic==="work") intro="Trong thực tế, ";
-if(topic==="mind") intro="Về nội tâm, ";
-if(topic==="decision") intro="Ở thời điểm này, ";
-
-// story
-let s="👉 Không phải ngẫu nhiên bạn rút ra bộ bài này.\n\n";
-
-s+=`${intro}${name}, trước đây bạn ${mgs[0]}. `;
-s+=`Hiện tại, bạn ${mgs[1]}. `;
-s+=`Tuy nhiên, vấn đề là ${mgs[2]}. `;
-s+=`Bạn đang ${mgs[3]}, nhưng điều này chưa giải quyết triệt để. `;
-s+=`Vì vậy, kết quả sẽ là ${mgs[4]}. `;
-
-if(picked[4].rev){
-s+="\n\n⚠️ Nếu không thay đổi, kết quả này có thể trở nên tiêu cực.";
-}
-
-if(num==7) s+="\n\nBạn thiên về nội tâm, hãy nhìn lại bên trong.";
-if(num==8) s+="\n\nBạn thiên về thực tế, hãy cân nhắc lợi ích rõ ràng.";
-
-if(q.includes("tiền")) s+="\n\nĐiều này liên quan tài chính.";
-if(q.includes("yêu")) s+="\n\nĐiều này liên quan cảm xúc.";
-
-s+="\n\nĐiều bạn đang né tránh là: bạn đã biết, nhưng chưa dám đối diện.";
-s+="\n\n— Lời bình của Nam Hải tiên sinh";
-
-let short=s.slice(0,Math.floor(s.length*0.7));
-typeText(short);
-
-document.getElementById("paywall").classList.remove("hidden");
-document.getElementById("paywall").innerHTML=`
-<div class="result-card lock">
-<p>Bạn đã thấy 70%. Nhập mã để xem tiếp</p>
-<input id="code">
-<button onclick="unlock('${encodeURIComponent(s)}')">OK</button>
-<p id="err"></p>
-</div>`;
-
-localStorage.setItem("seen","1");
-locked=true;
-saveHistory();
-}
-
-// ===== UNLOCK =====
-function unlock(full){
-let code=document.getElementById("code").value;
-if(code==="NAMHAI"){
-let text=decodeURIComponent(full);
-typeText(text);
-document.getElementById("paywall").classList.add("hidden");
-document.getElementById("copyBtn").classList.remove("hidden");
-window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
-}else{
-document.getElementById("err").innerText="Sai mã";
-}
-}
-
-// ===== COPY =====
-function copyText(){
-navigator.clipboard.writeText(document.getElementById("final").innerText);
-alert("Đã sao chép!");
-}
-
-// ===== RESET =====
-function resetApp(){
-localStorage.clear();
-location.reload();
-}
-
-// ===== HISTORY =====
-function saveHistory(){
-let h=JSON.parse(localStorage.getItem("tarot")||"[]");
-h.push({t:new Date().toLocaleString()});
-if(h.length>5)h.shift();
-localStorage.setItem("tarot",JSON.stringify(h));
-document.getElementById("history").innerHTML="<h4>Lịch sử</h4>"+h.map(i=>"<div>"+i.t+"</div>").join("");
-}
-
-// ===== MUSIC =====
-function toggleMusic(){
-let m=document.getElementById("bgm");
-if(m.paused){m.play()}else{m.pause()}
-}
-
-</script></body>
+        function toggleMusic(){
+            let m=document.getElementById("bgm");
+            if(m.paused){m.play()}else{m.pause()}
+        }
+    </script>
+</body>
 </html>
