@@ -1,103 +1,85 @@
-<!DOCTYPE html><html lang="vi">
+<!DOCTYPE html>
+<html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Nam Hải Oracle – Masterpiece</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body{font-family:sans-serif;background:#0d0d0d;color:#fff;text-align:center;padding:15px}
-input,select,button{padding:10px;margin:5px;border-radius:6px;border:none;font-size:16px}
-button{background:#ffcc00;color:#000;font-weight:bold;cursor:pointer}
-.result-card{margin:10px;padding:12px;border:1px solid #444;border-radius:12px; background: #1a1a1a;}
-.card-img{width:90px;max-width:100%;transition:0.3s; min-height: 140px; background: #222; border-radius: 4px; display: inline-block;}
-.rev{transform:rotate(180deg)}
-.hidden{display:none}
-.lock{background:#111;border:2px solid #ffcc00}
-#final{white-space:pre-wrap; margin-top:20px; text-align:left; line-height:1.8; font-size:17px; max-width:500px; margin-left:auto; margin-right:auto; color: #f0f0f0;}
-@media (max-width:600px){ .card-img{width:80px} button{width:90%} }
-</style>
-</head><body><h2>🔮 Nam Hải Oracle</h2><input id="name" placeholder="Họ và tên">
-<input id="question" placeholder="Bạn đang nghĩ gì..."><br><input id="day" type="number" placeholder="Ngày sinh">
-<input id="month" type="number" placeholder="Tháng sinh">
-<input id="year" type="number" placeholder="Năm sinh"><br><select id="topic">
-<option value="love">Tình cảm</option>
-<option value="work">Công việc</option>
-<option value="decision">Quyết định</option>
-<option value="mind">Nội tâm</option>
-</select><select id="state">
-<option value="pre">Chuẩn bị quyết định</option>
-<option value="hesitate">Đang do dự</option>
-<option value="after">Đã quyết định</option>
-</select><br>
-<button onclick="startDraw()">Trải bài 🎵</button>
-<button onclick="toggleMusic()">🔊/🔇</button>
-<button onclick="resetApp()">🔄 Reset</button><div id="results"></div>
-<div id="final"></div>
-<button id="copyBtn" class="hidden" onclick="copyText()">📋 Sao chép</button>
-<div id="paywall" class="hidden"></div>
-
-<audio id="bgm" loop preload="auto" crossorigin="anonymous">
-<source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3" type="audio/mpeg">
-</audio>
+    <meta charset="UTF-8">
+    <title>Nam Hải Oracle – Trải Nghiệm Tâm Lý 10/10</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{font-family:sans-serif;background:#0d0d0d;color:#fff;text-align:center;padding:15px}
+        input,select,button{padding:10px;margin:5px;border-radius:6px;border:none;font-size:16px}
+        button{background:#ffcc00;color:#000;font-weight:bold;cursor:pointer}
+        .result-card{margin:10px;padding:12px;border:1px solid #444;border-radius:12px; background: #1a1a1a;}
+        .card-img{width:90px;max-width:100%;transition:0.3s; min-height: 140px; background: #222; border-radius: 4px; display: inline-block;}
+        .rev{transform:rotate(180deg)}
+        .hidden{display:none}
+        .lock{background:#111;border:2px solid #ffcc00}
+        #final{white-space:pre-wrap; margin-top:20px; text-align:left; line-height:1.8; font-size:17px; max-width:500px; margin-left:auto; margin-right:auto; color: #f0f0f0;}
+        @media (max-width:600px){ .card-img{width:80px} button{width:90%} }
+    </style>
+</head>
+<body>
+    <h2>🔮 Nam Hải Oracle</h2>
+    <input id="name" placeholder="Họ và tên">
+    <input id="question" placeholder="Bạn đang hỏi về chuyện gì..."><br>
+    <input id="day" type="number" placeholder="Ngày">
+    <input id="month" type="number" placeholder="Tháng">
+    <input id="year" type="number" placeholder="Năm sinh"><br>
+    <select id="topic">
+        <option value="love">Tình cảm</option>
+        <option value="work">Công việc</option>
+        <option value="decision">Quyết định</option>
+        <option value="mind">Nội tâm</option>
+    </select>
+    <select id="state">
+        <option value="pre">Chuẩn bị quyết định</option>
+        <option value="hesitate">Đang do dự</option>
+        <option value="after">Đã quyết định</option>
+    </select><br>
+    <button onclick="startDraw()">Trải bài 🎵</button>
+    <button onclick="toggleMusic()">🔊/🔇</button>
+    <button onclick="resetApp()">🔄 Reset</button>
+    <div id="results"></div>
+    <div id="final"></div>
+    <button id="copyBtn" class="hidden" onclick="copyText()">📋 Sao chép</button>
+    <div id="paywall" class="hidden"></div>
+    <audio id="bgm" loop preload="auto" crossorigin="anonymous">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3" type="audio/mpeg">
+    </audio>
 
 <script>
 const cards = [
-{name:"Kẻ Khờ",meaning:"bắt đầu mới",reversedMeaning:"mất phương hướng"},
-{name:"Pháp Sư",meaning:"kiểm soát",reversedMeaning:"thiếu kiểm soát"},
-{name:"Nữ Tư Tế",meaning:"trực giác",reversedMeaning:"mơ hồ"},
-{name:"Hoàng Hậu",meaning:"cảm xúc",reversedMeaning:"phụ thuộc"},
-{name:"Hoàng Đế",meaning:"cấu trúc",reversedMeaning:"cứng nhắc"},
-{name:"Giáo Hoàng",meaning:"niềm tin",reversedMeaning:"lệch chuẩn"},
-{name:"Người Tình",meaning:"kết nối",reversedMeaning:"mâu thuẫn"},
-{name:"Cỗ Xe",meaning:"tiến lên",reversedMeaning:"lệch hướng"},
-{name:"Sức Mạnh",meaning:"nội lực",reversedMeaning:"mất kiểm soát"},
-{name:"Ẩn Sĩ",meaning:"chiêm nghiệm",reversedMeaning:"cô lập"},
-{name:"Bánh Xe",meaning:"biến động",reversedMeaning:"lệch nhịp"},
-{name:"Công Lý",meaning:"cân bằng",reversedMeaning:"thiên lệch"},
-{name:"Treo Ngược",meaning:"góc nhìn mới",reversedMeaning:"bế tắc"},
-{name:"Cái Chết",meaning:"chuyển hóa",reversedMeaning:"chưa buông"},
-{name:"Tiết Độ",meaning:"hài hòa",reversedMeaning:"lệch"},
-{name:"Ác Quỷ",meaning:"ràng buộc",reversedMeaning:"giải thoát"},
-{name:"Tòa Tháp",meaning:"biến cố",reversedMeaning:"trì hoãn"},
-{name:"Ngôi Sao",meaning:"hy vọng",reversedMeaning:"mất niềm tin"},
-{name:"Mặt Trăng",meaning:"mơ hồ",reversedMeaning:"lộ ra"},
-{name:"Mặt Trời",meaning:"rõ ràng",reversedMeaning:"ảo tưởng"},
-{name:"Phán Xét",meaning:"thức tỉnh",reversedMeaning:"trì hoãn"},
-{name:"Thế Giới",meaning:"hoàn thành",reversedMeaning:"chưa trọn"}
+    {name:"Kẻ Khờ",meaning:"muốn thử cái mới nhưng chưa có kế hoạch",reversedMeaning:"đang đi sai hướng nhưng cố chấp không quay đầu"},
+    {name:"Pháp Sư",meaning:"tỏ ra mình vẫn kiểm soát tốt mọi thứ",reversedMeaning:"đang bị người khác dắt mũi hoặc thao túng"},
+    {name:"Nữ Tư Tế",meaning:"linh tính thấy bất thường nhưng chưa dám tin",reversedMeaning:"đang cố lờ đi dấu hiệu bản thân thấy rõ"},
+    {name:"Hoàng Hậu",meaning:"mải mê hưởng thụ mà quên mục tiêu chính",reversedMeaning:"để sự phụ thuộc lấn át lý trí"},
+    {name:"Hoàng Đế",meaning:"gồng mình để giữ cái tôi và vị thế",reversedMeaning:"đuối sức vì phải gánh vác quá nhiều"},
+    {name:"Giáo Hoàng",meaning:"đi theo lối mòn cũ kỹ không còn phù hợp",reversedMeaning:"làm việc đi ngược lại giá trị bản thân"},
+    {name:"Người Tình",meaning:"đứng núi này trông núi nọ, lòng không yên",reversedMeaning:"mâu thuẫn bên trong làm bạn mất ngủ"},
+    {name:"Cỗ Xe",meaning:"nôn nóng kết quả mà bỏ qua tiểu tiết",reversedMeaning:"mất phương hướng và dễ nổi nóng vô cớ"},
+    {name:"Sức Mạnh",meaning:"nén nhịn, ngậm đắng nuốt cay giữ hòa khí",reversedMeaning:"để cảm xúc bộc phát làm hỏng việc"},
+    {name:"Ẩn Sĩ",meaning:"tách mình ra, nghĩ nhiều nhưng không nói",reversedMeaning:"cô độc quá mức dẫn đến tự làm khổ mình"},
+    {name:"Bánh Xe",meaning:"mọi thứ thay đổi nhanh không kịp thích nghi",reversedMeaning:"đen đủi, làm gì cũng gặp trắc trở"},
+    {name:"Công Lý",meaning:"quá rạch ròi, tính toán đến mức khô khan",reversedMeaning:"thấy mình chịu thiệt thòi vô lý"},
+    {name:"Treo Ngược",meaning:"kẹt trong mớ bòng bong chưa thể thoát",reversedMeaning:"hy sinh quá nhiều cho thứ không xứng"},
+    {name:"Cái Chết",meaning:"từ bỏ thói quen hoặc mối quan hệ cũ",reversedMeaning:"níu kéo thứ vốn dĩ đã không còn"},
+    {name:"Tiết Độ",meaning:"gượng ép giữ cho mọi thứ không đổ vỡ",reversedMeaning:"sống lệch lạc, đánh mất đi điềm tĩnh"},
+    {name:"Ác Quỷ",meaning:"bị ham muốn nhất thời làm mờ lý trí",reversedMeaning:"nhận ra và muốn thoát khỏi ràng buộc"},
+    {name:"Tòa Tháp",meaning:"thứ bạn xây dựng đang lung lay sắp vỡ",reversedMeaning:"trì hoãn cú sốc sớm muộn phải đối mặt"},
+    {name:"Ngôi Sao",meaning:"trông chờ phép màu hơn là hành động",reversedMeaning:"trống rỗng và mất sạch niềm tin"},
+    {name:"Mặt Trăng",meaning:"lo sợ kịch bản xấu tự mình vẽ ra",reversedMeaning:"sự thật bị che giấu sắp lộ ra"},
+    {name:"Mặt Trời",meaning:"quá tự tin dẫn đến chủ quan",reversedMeaning:"thành công ngắn hạn làm bạn ngủ quên"},
+    {name:"Phán Xét",meaning:"đối mặt hậu quả từ những việc cũ",reversedMeaning:"trốn tránh nhìn thẳng vào sai lầm"},
+    {name:"Thế Giới",meaning:"đạt giới hạn và không muốn cố gắng thêm",reversedMeaning:"dở dang, không bao giờ thấy trọn vẹn"}
 ];
 
 const painPoints = {
-    love: [
-        "thực ra bạn không sợ cô đơn, bạn chỉ sợ cảm giác bị thay thế.",
-        "bạn đang cố trở thành phiên bản họ muốn, thay vì là chính mình.",
-        "niềm tin đã vỡ một lần, nên giờ nhìn đâu bạn cũng thấy sự phản bội.",
-        "bạn đang dùng sự im lặng để tự hành hạ chính mình, thay vì giải quyết.",
-        "thứ bạn đang níu giữ là một thói quen khó bỏ, không phải tình yêu chân chính."
-    ],
-    work: [
-        "bạn gánh vác trách nhiệm không phải của mình vì sợ bị đánh giá thấp.",
-        "cái giá của sự ổn định hiện tại là sự bào mòn đam mê của chính bạn.",
-        "bạn biết mình xứng đáng nhiều hơn, nhưng nỗi sợ thất bại đang xích chân bạn lại.",
-        "đối thủ lớn nhất lúc này là sự trì hoãn núp bóng dưới cái tên 'cẩn thận'.",
-        "bạn đang cố chứng minh giá trị với những người vốn dĩ không bao giờ công nhận bạn."
-    ],
-    mind: [
-        "bạn đang tự tạo ra một nhà tù tâm trí và tự nhốt mình vào đó mỗi đêm.",
-        "nỗi sợ bị bỏ rơi khiến bạn quá nhạy cảm với từng cử chỉ nhỏ của người khác.",
-        "bạn đang lo lắng cho một kịch bản tồi tệ vốn dĩ chưa hề xảy ra trong thực tế.",
-        "bạn thấu hiểu nỗi đau của cả thế giới, nhưng lại quá khắc nghiệt với bản thân mình.",
-        "thứ bạn thực sự cần là sự tĩnh lặng để đối diện, không phải thêm những lời khuyên sáo rỗng."
-    ],
-    decision: [
-        "thật lòng đi, bạn đã có câu trả lời rồi, bạn chỉ đang tìm người ủng hộ nó thôi.",
-        "chọn phương án an toàn nhất vào lúc này đôi khi lại là quyết định mạo hiểm nhất.",
-        "bạn sợ chọn sai, nhưng thực tế việc không chọn gì mới là sai lầm lớn nhất.",
-        "đừng để những bóng ma thất bại trong quá khứ làm mờ đi lý trí của bạn ở hiện tại.",
-        "mọi sự do dự của bạn đều bắt nguồn từ việc bạn chưa thực sự tin vào bản sắc của chính mình."
-    ]
+    love: ["thực ra bạn không sợ cô đơn, bạn chỉ sợ cảm giác bị thay thế.","bạn đang cố trở thành phiên bản họ muốn, thay vì là chính mình.","niềm tin đã vỡ một lần, nên giờ nhìn đâu bạn cũng thấy sự phản bội."],
+    work: ["bạn gánh vác trách nhiệm không phải của mình vì sợ bị đánh giá thấp.","cái giá của sự ổn định hiện tại là sự bào mòn đam mê của chính bạn.","đối thủ lớn nhất lúc này là sự trì hoãn núp bóng dưới cái tên 'cẩn thận'."],
+    mind: ["bạn đang tự tạo ra một nhà tù tâm trí và tự nhốt mình vào đó mỗi đêm.","nỗi sợ bị bỏ rơi khiến bạn quá nhạy cảm với từng cử chỉ nhỏ của người khác.","bạn thấu hiểu nỗi đau của cả thế giới, nhưng lại quá khắc nghiệt với bản thân mình."],
+    decision: ["thật lòng đi, bạn đã có câu trả lời rồi, bạn chỉ đang tìm người ủng hộ nó thôi.","chọn phương án an toàn nhất vào lúc này đôi khi lại là quyết định mạo hiểm nhất.","bạn sợ chọn sai, nhưng thực tế việc không chọn gì mới là sai lầm lớn nhất."]
 };
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
-function validDOB(d,m,y){return d>=1&&d<=31 && m>=1&&m<=12 && y>=1900&&y<=2100;}
 function lifeNumber(d,m,y){let sum=(d+""+m+""+y).split("").reduce((a,b)=>a+parseInt(b),0);while(sum>9){sum=sum.toString().split("").reduce((a,b)=>a+parseInt(b),0)}return sum;}
 
 let picked=[],step=0;
@@ -108,9 +90,7 @@ function startDraw(){
     let q=document.getElementById("question").value.trim();
     if(!name||!q){alert("Nam Hải xin nhắc: Bạn hãy nhập đủ Tên và Câu hỏi nhé!");return;}
     if(locked){showPaywall();return;}
-    
     document.getElementById("bgm").play().catch(()=>{});
-
     step=0;
     picked=shuffle(cards.map((c,i)=>({...c,index:i}))).slice(0,5).map(c=>({card:c,rev:Math.random()<0.5}));
     document.getElementById("results").innerHTML="";
@@ -121,11 +101,10 @@ function startDraw(){
 
 function showNext(){
     if(step<5){
-        let roles=["Quá khứ","Hiện tại","Vấn đề","Hành vi","Kết quả"];
+        let roles=["Quá khứ","Hiện tại","Nút thắt","Hành động","Hậu quả"];
         let p=picked[step];
-        let formattedIdx = p.card.index < 10 ? "0" + p.card.index : p.card.index;
-        let imgUrl = `https://www.sacred-texts.com/tarot/pkt/img/ar${formattedIdx}.jpg`;
-        
+        let realIdx = p.card.index; 
+        let imgUrl = `https://www.sacred-texts.com/tarot/pkt/img/ar${realIdx < 10 ? '0'+realIdx : realIdx}.jpg`;
         document.getElementById("results").innerHTML+=`
         <div class="result-card">
             <b>${roles[step]}</b><br>
@@ -151,28 +130,35 @@ function typeText(text){
 
 function finish(){
     let name=document.getElementById("name").value;
+    let q=document.getElementById("question").value.toLowerCase();
     let topic=document.getElementById("topic").value;
     let state=document.getElementById("state").value;
     let d=parseInt(document.getElementById("day").value);
     let m=parseInt(document.getElementById("month").value);
     let y=parseInt(document.getElementById("year").value);
-    let num=validDOB(d,m,y)?lifeNumber(d,m,y):null;
+    let num=lifeNumber(d,m,y);
     let mgs=picked.map(p=>p.rev?p.card.reversedMeaning:p.card.meaning);
 
-    let pool = painPoints[topic] || painPoints.mind;
-    let randomPain = pool[Math.floor(Math.random() * pool.length)];
+    let randomPain = painPoints[topic][Math.floor(Math.random() * painPoints[topic].length)];
     let personalizedPain = state === "hesitate" ? `${name} ơi, sự do dự này thực chất là vì bạn đang sợ mất đi vùng an toàn cũ. ${randomPain}` : `${name} này, ${randomPain}`;
 
-    let s=`👉 Chào ${name}, những lá bài này hiện diện để soi chiếu sự thật bạn đang đối mặt.\n\n`;
-    s+=`Mọi chuyện bắt đầu khi bạn cảm thấy ${mgs[0]}. Hiện tại, bạn đang ở trong trạng thái ${mgs[1]}.\n\n`;
-    s+=`⚠️ **Nam Hải tiên sinh thấy rằng:** ${personalizedPain}\n\n`;
-    s+=`Nút thắt thực sự là sự ${mgs[2]}. Có thể bạn đang xử lý bằng cách ${mgs[3]}, nhưng kết quả cuối cùng hướng tới sự ${mgs[4]}.\n\n`;
-    
-    if(num==7) s+="✨ Số chủ đạo 7: Hãy tin vào trực giác bên trong mình.\n\n";
-    if(num==8) s+="✨ Số chủ đạo 8: Hãy quyết đoán và thực tế hơn.\n\n";
+    const styles = [
+        () => `👉 ${name}, câu chuyện của bạn không mới, thực ra bạn đã thấy nó lặp lại rồi.\n\nQuá khứ bạn từng ${mgs[0]}, và nó tạo thành một cái vết hằn trong cách bạn xử lý mọi chuyện. Hiện tại, bạn đang ở trạng thái ${mgs[1]}, như thể đã hiểu nhưng chưa dám dứt.\n\n⚠️ **Tiên sinh nhận thấy:** ${personalizedPain}\n\nNút thắt thực sự là bạn đang ${mgs[2]}. Bạn đang hành động kiểu ${mgs[3]}, nhưng hậu quả là mọi thứ sẽ tiếp tục ${mgs[4]}.\n\n💡 Bạn không thiếu câu trả lời — bạn chỉ chưa dám chọn nó.`,
+        () => `👉 ${name}, có một sự thật bạn đã chạm tới nhưng chưa muốn giữ lại.\n\nBạn từng ${mgs[0]}, và từ đó bạn chọn cách bảo vệ mình bằng sự im lặng. Bây giờ, bạn đang ${mgs[1]}, nhưng lòng vẫn rối như tơ vò.\n\n⚠️ **Tiên sinh thấy:** ${personalizedPain}\n\nBạn nghĩ vấn đề là hoàn cảnh, nhưng thực ra nó nằm ở chỗ bạn ${mgs[2]}. Bạn cố ${mgs[3]} để né tránh, nhưng cái giá phải trả là sự ${mgs[4]}.\n\n💡 Câu trả lời ngay trước mắt, quan trọng là bạn có dám nhìn vào nó không?`,
+        () => `👉 ${name}, đừng để sự bận rộn che mắt, hãy nhìn sâu vào bên trong.\n\nBạn bắt đầu từ việc ${mgs[0]}, và nó vẫn đang âm thầm điều khiển bạn. Hiện tại, bạn ${mgs[1]}, như một người đứng giữa ngã ba đường.\n\n⚠️ **Phán từ:** ${personalizedPain}\n\nĐiểm nghẽn là sự ${mgs[2]}. Cách bạn đang ${mgs[3]} chỉ làm mọi thứ tệ hơn, dẫn đến kết cục ${mgs[4]}.\n\n💡 Bạn biết mình cần làm gì rồi, chỉ là bạn đang tìm một lý do để trì hoãn thôi.`
+    ];
 
-    s+="💡 Câu trả lời vốn đã ở trong tim bạn, bài chỉ là tấm gương soi chiếu. Bạn đã sẵn sàng đối diện chưa?\n\n";
-    s+="— Lời bình từ Nam Hải tiên sinh";
+    let s = styles[Math.floor(Math.random()*styles.length)]();
+
+    // DÙNG QUESTION ĐỂ "LỘT TRẦN" USER
+    if(q.includes("có nên") || q.includes("không")) s += "\n\n👉 Bạn hỏi 'có nên' nhưng thực ra trong lòng đã có đáp án, bạn chỉ đang tìm một lời xác nhận để bớt thấy tội lỗi thôi.";
+    if(q.includes("người") || q.includes("ai") || q.includes("anh") || q.includes("em")) s += "\n\n👉 Bạn đang nhìn vào hành động của người đó, nhưng quên mất rằng chính phản ứng của bạn mới là thứ tạo ra bế tắc này.";
+    if(q.includes("tiền") || q.includes("giàu") || q.includes("lương")) s += "\n\n👉 Tiền chỉ là kết quả. Thứ bạn thiếu lúc này là một định hướng thực tế chứ không phải là thêm một cơ hội may rủi.";
+
+    if(num==7) s += "\n\n✨ Số 7: Trực giác bạn rất mạnh, nhưng đừng để nó biến thành sự đa nghi.";
+    if(num==8) s += "\n\n✨ Số 8: Quyết đoán lên, sự trì hoãn lúc này chính là kẻ thù lớn nhất.";
+
+    s += "\n\n— Lời bình từ Nam Hải tiên sinh";
 
     let short=s.slice(0,Math.floor(s.length*0.72));
     typeText(short);
@@ -180,7 +166,7 @@ function finish(){
     document.getElementById("paywall").classList.remove("hidden");
     document.getElementById("paywall").innerHTML=`
     <div class="result-card lock">
-        <p>🔒 Bạn vừa nhận được 72% lời giải. 28% còn lại là bí mật về sự chuyển hóa dành riêng cho ${name}. Nhập mã NAMHAI để mở khóa chìa khóa cuối cùng.</p>
+        <p>🔒 72% sự thật đã lộ diện. 28% còn lại là "điểm kích hoạt" để bạn thay đổi hoàn toàn cục diện này. Nhập mã NAMHAI để xem tiếp.</p>
         <input id="code" placeholder="Mã..." style="width:140px">
         <button onclick="unlock('${encodeURIComponent(s)}')">Mở khóa</button>
     </div>`;
@@ -203,4 +189,6 @@ function copyText(){
 }
 function resetApp(){ localStorage.clear(); location.reload(); }
 function toggleMusic(){ let m=document.getElementById("bgm"); m.paused ? m.play() : m.pause(); }
-</script></body></html>
+</script>
+</body>
+</html>
